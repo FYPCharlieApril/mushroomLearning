@@ -1,7 +1,6 @@
 import numpy as np
 
 def constructH(dMat, fList):
-    #TODO
     r, c = dMat.shape;
     hMat = []
     for i in range(r):
