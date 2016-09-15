@@ -13,11 +13,11 @@ ranList = [random.randint(0,1000) for _ in range(20)]
 # df is the data of the mushrooms, size 8123 * 23, with 1 colume of label and 22 for feature, 8123 data slots
 df.tail()
 dMat = df.iloc[:].values
-testCases = [[] ]
+testCases = []
 for i in range(20):
-    testCases[i] = dMat[ranList[i]]
-print(testCases)
-
+    testCases.append(dMat[ranList[i]].tolist())
+testCases = np.matrix(testCases)
+print (testCases.shape)
 
 # definition of V and E
 # compute the column number of E matrix
