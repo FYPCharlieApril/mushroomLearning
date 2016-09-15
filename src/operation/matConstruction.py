@@ -6,6 +6,7 @@ def constructH(dMat, fList, hMat, cols):
         thisList = [0] * cols
         for fea in dSlide:
             index = np.argwhere(fList == fea)
+
     return
 
 def constructDv(dMat):

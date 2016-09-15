@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
-
-import operation.matConstruction as mc
-
+import src.operation.matConstruction as mc
 data_src = '../dataFile/agaricus-lepiota.data'
 testNum = 20
 
@@ -18,7 +16,9 @@ dMat = df.iloc[:].values
 fList = list(enumerate(map(lambda xs : list(set(xs)), zip(*dMat))))
 fList = list(map(list, fList))
 fList = np.concatenate(list(map(lambda xs : list(map(lambda x : x + str(xs[0]),xs[1])), fList))[1:])
-print (fList)
+hMap = []
+
+print (len(fList))
 
 
 
