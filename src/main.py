@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import random
-import src.operation.matConstruction as mc
+import src.TotalVariation as tv
 
 testNum = 20
 
@@ -22,16 +22,6 @@ for i in range(testNum):
     testCases.append(dMat[ranList[i]].tolist())
 testCases = np.matrix(testCases)
 
-# definition of V and E
-# compute the column number of E matrix
-fList = list(enumerate(map(lambda xs : list(set(xs)), zip(*dMat))))
-fList = list(map(list, fList))
-fList = np.concatenate(list(map(lambda xs : list(map(lambda x : x + str(xs[0]),xs[1])), fList))[1:])
-hMat = mc.constructH(testCases,fList)
-print (hMat)
-
-
-
-
-
+tv = tv.TotalVariation
+hMat = tv.constructH(testCases,dMat)
 
