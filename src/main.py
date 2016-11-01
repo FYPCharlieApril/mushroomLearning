@@ -20,7 +20,7 @@ df = pd.read_csv(data_src)
 # data_src = 'https://archive.ics.uci.edu/ml/machine-learning-databases/mushroom/agaricus-lepiota.data'
 
 H = encodeData(df, range(df.shape[1]))
-print(H)
+
 
 
 
