@@ -5,6 +5,9 @@ class subgradient_method:
         self.hg = hg
 
     def markov_operator(self,  f):
+        # here we compute A and W
+        W = []
+        L = []
         hMat = self.hg.hMat
         v_size, e_size = hMat.shape[0], hMat.shape[1]
         N = np.array(list(enumerate(f)))
@@ -22,15 +25,15 @@ class subgradient_method:
                 v = v_can[0]
                 A[u, v] = A[u, v] + self.hg.weight[e]
                 A[v, u] = A[u, v]
-        W = []
-        L = []
+
         for i, u in enumerate(N):
             W.append(A[u, :].sum())
-        for i in range(N.shape[0]):
-            L.append([W[i]]*v_size)
 
         # following are teh procedures of computing the Markov operator, here the projection matrix we use
         # are the one with all entries to be 1.
+        for i in range(N.shape[0]):
+            L.append([W[i]]*v_size)
+
         L = np.matrix(L)
         col_sum = []
         R = []
