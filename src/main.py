@@ -34,6 +34,5 @@ ind_train, y_train = y_train[:, 0], y_train[:, 1]
 
 f = np.array([0] * 5644)
 f[ind_train] = y_train
-
 st = subgradient_method(h)
 W = st.markov_operator(f)
