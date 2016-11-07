@@ -22,10 +22,21 @@ class subgradient_method:
                 v = v_can[0]
                 A[u, v] = A[u, v] + self.hg.weight[e]
                 A[v, u] = A[u, v]
-        W = np.matrix([[0] * N.shape[0]] * N.shape[0])
+        W = []
+        L = []
         for i, u in enumerate(N):
-            W[i, i] = A[u, :].sum()
-        return W
+            W.append(A[u, :].sum())
+        for i in range(N.shape[0]):
+            L.append([W[i]]*V)
+        L = np.matrix(L)
+        col_sum = []
+        R = []
+        for i in range(V):
+            col_sum.append(A[:, i].sum())
+        for _ in range(N.shape[0]):
+            R.append(col_sum)
+        R = np.matrix(R)
+        return (L-R).dot(f)
 
     def sgm(self):
         print("TO BE DONE")
