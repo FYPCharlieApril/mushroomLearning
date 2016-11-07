@@ -33,14 +33,9 @@ class subgradient_method:
         # are the one with all entries to be 1.
         for i in range(N.shape[0]):
             L.append([W[i]]*v_size)
-
         L = np.matrix(L)
-        col_sum = []
-        R = []
-        for i in range(v_size):
-            col_sum.append(A[:, i].sum())
-        for _ in range(N.shape[0]):
-            R.append(col_sum)
+        col_sum = np.array(np.sum(A, axis=0))[0]
+        R = [col_sum] * N.shape[0]
         R = np.matrix(R)
         return (L-R).dot(f)
 
