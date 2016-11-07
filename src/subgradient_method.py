@@ -35,8 +35,7 @@ class subgradient_method:
             L.append([W[i]]*v_size)
         L = np.matrix(L)
         col_sum = np.array(np.sum(A, axis=0))[0]
-        R = [col_sum] * N.shape[0]
-        R = np.matrix(R)
+        R = np.matrix([col_sum] * N.shape[0])
         return (L-R).dot(f)
 
     def sgm(self):
