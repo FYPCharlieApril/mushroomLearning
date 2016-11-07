@@ -28,6 +28,9 @@ class subgradient_method:
             W.append(A[u, :].sum())
         for i in range(N.shape[0]):
             L.append([W[i]]*v_size)
+
+        # following are teh procedures of computing the Markov operator, here the projection matrix we use
+        # are the one with all entries to be 1.
         L = np.matrix(L)
         col_sum = []
         R = []
