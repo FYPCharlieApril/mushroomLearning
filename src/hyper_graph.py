@@ -4,9 +4,15 @@ from sklearn.preprocessing import OneHotEncoder
 class hyper_graph:
     def __init__(self, weight, head, tail, df, catFeaList, label_mapping):
         self.weight = weight
-        self.head=head
-        self.tail=tail
-        self.constructor(df=df, catFeaList=catFeaList,label_mapping=label_mapping)
+        self.constructor(df=df, catFeaList=catFeaList, label_mapping=label_mapping)
+        if head is not None:
+            self.head = head
+        else:
+            self.head = self.hMat
+        if tail is not None:
+            self.tail = tail
+        else:
+            self.tail = self.hMat
 
     def constructor(self, df, catFeaList, label_mapping):
         le = LabelEncoder()
