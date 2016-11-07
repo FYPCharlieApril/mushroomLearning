@@ -18,10 +18,10 @@ class hyper_graph:
         le = LabelEncoder()
         if label_mapping is not None:
             df['label'] = df['label'].map(label_mapping)
-        df = df.dropna()
+
         y, X = df.values[:, 0], df.values[:, 1:]
         ohe = OneHotEncoder(categorical_features=catFeaList)
-        for i in range(X.shape[1]):
+        for i in catFeaList:
             X[:, i] = le.fit_transform(X[:, i])
         hMat = ohe.fit_transform(X).toarray()
         self.hMat = hMat

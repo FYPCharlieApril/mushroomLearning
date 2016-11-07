@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
-import src.hyper_graph as hg
+from src.hyper_graph import hyper_graph
+from src.subgradient_method import subgradient_method
+
 np.set_printoptions(threshold=np.nan)
 
 Header = np.array(['label', 'cap-shape', 'cap-surface', 'cap-color', 'bruises', 'odor', 'gill-attachment', 'gill-spacing', 'gill-size', 'gill-color',
@@ -13,9 +15,10 @@ data_src = '../dataFile/agaricus-lepiota.data'
 
 # df is the data of the mushrooms, size 8123 * 23, with 1 colume of label and 22 for feature, 8123 data slots
 df = pd.read_csv(data_src, header=None, na_values=['?'])
+df = df.dropna()
 df.columns = Header
 
-h = hg.hyper_graph(weight=None, head=None, tail=None, df=df, \
+h = hyper_graph(weight=np.array([1] * df.shape[0]), head=None, tail=None, df=df, \
                    catFeaList=range(22), label_mapping={'e': 1, 'p': -1})
 
 from sklearn.model_selection import train_test_split
@@ -32,3 +35,5 @@ ind_train, y_train = y_train[:, 0], y_train[:, 1]
 f = np.array([0] * 5644)
 f[ind_train] = y_train
 
+st = subgradient_method(h)
+W = st.markov_operator(f)
