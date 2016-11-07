@@ -6,6 +6,7 @@ Header = np.array(['label', 'cap-shape', 'cap-surface', 'cap-color', 'bruises', 
        'stalk-shape', 'stalk-root', 'stalk-surface-above-ring', 'stalk-surface-below-ring', 'stalk-color-above-ring',
           'stalk-color-below-ring', 'veil-type', 'veil-color', 'ring-number', 'ring-type', 'spore-print-color', 'population', 'habitat'])
 
+train_size_arr = [20,40,60,80,100,120,140,160,180,200]
 data_src = '../dataFile/agaricus-lepiota.data'
 # data_src = 'https://archive.ics.uci.edu/ml/machine-learning-databases/mushroom/agaricus-lepiota.data'
 
@@ -19,7 +20,8 @@ h = hg.hyper_graph(weight=None, head=None, tail=None, df=df, \
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-train_size_arr = [20,40,60,80,100,120,140,160,180,200]
+
+
 result = []
 for train_size_ent in train_size_arr:
     X,y = h.hMat, h.y
