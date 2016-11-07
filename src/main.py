@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import src.hyper_graph as hg
+np.set_printoptions(threshold=np.nan)
 
 Header = np.array(['label', 'cap-shape', 'cap-surface', 'cap-color', 'bruises', 'odor', 'gill-attachment', 'gill-spacing', 'gill-size', 'gill-color',
        'stalk-shape', 'stalk-root', 'stalk-surface-above-ring', 'stalk-surface-below-ring', 'stalk-color-above-ring',
@@ -18,32 +19,15 @@ h = hg.hyper_graph(weight=None, head=None, tail=None, df=df, \
                    catFeaList=range(22), label_mapping={'e': 1, 'p': -1})
 
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-
-
 
 result = []
-for train_size_ent in train_size_arr:
-    X,y = h.hMat, h.y
-    X_train, X_test, y_train, y_test = \
-        train_test_split(X, y, train_size=train_size_ent, random_state=0)
-    sc = StandardScaler()
-    sc.fit(X_train)
-    y_train = list(y_train)
-    from sklearn.linear_model import Perceptron
+X,y = h.hMat, h.y
+y =np.matrix(list(enumerate(y)))
 
-    ppn = Perceptron(n_iter=40, eta0=0.1, random_state=1)
-    ppn.fit(X_train, y_train)
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=20)
 
-    y_pred = ppn.predict(X_test)
-    result.append((y_test != y_pred).sum()/y_test.shape[0])
+ind_test, y_test = y_test[:, 0], y_test[:, 1]
+ind_train, y_train = y_train[:, 0], y_train[:, 1]
 
-
-import matplotlib.pyplot as plt
-plt.plot(train_size_arr, result, marker='o')
-plt.ylim([0, 0.15])
-plt.ylabel('Error rate')
-plt.xlabel('Number of test data')
-plt.grid()
-plt.tight_layout()
-plt.show()
+f = np.array([0] * 5644)
+f[ind_train] = y_train
