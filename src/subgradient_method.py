@@ -11,9 +11,9 @@ class subgradient_method:
         v_size, e_size = self.hg.hMat.shape[0], self.hg.hMat.shape[1]
         f_index = np.array(list(enumerate(f)))
         L = np.where((f_index[:, 1] == 1) | (f_index[:, 1] == -1))[0]
-        W = np.array([[0] * v_size] * v_size)
-        head, tail = self.hg.head, self.hg.tail
+        W = np.zeros((v_size, v_size))
         A = np.zeros((v_size, v_size))
+        head, tail = self.hg.head, self.hg.tail
         for e in range(e_size):
             e_tail = np.where(tail[:, e] == 1)[0]
             e_head = np.where(head[:, e] == 1)[0]
@@ -28,7 +28,6 @@ class subgradient_method:
 
         for i, u in f_index:
             W[i, i] = A[u, :].sum()
-
         # following are teh procedures of computing the Markov operator, here the projection matrix we use
         # are the one with all entries to be 1.
         f_out = (W-A).dot(f)
@@ -36,17 +35,18 @@ class subgradient_method:
         return f_out
 
     def sgm(self,f):
-
-        t = 1
-        no_N = (f==0).sum()
-        stepsize = math.sqrt(no_N)/30
-        f_iter= f
+        f_index = np.array(list(enumerate(f)))
+        L = np.where((f_index[:, 1] == 1) | (f_index[:, 1] == -1))[0]
+        t = 0
+        f_iter, f_last = f, f
         f_iter = self.markov_operator(f_iter)
-        #t += 1
 
-        while(t < stepsize):
+        #while(abs(LA.norm(f_iter - f_last)) < 100):
+        while (t < 200):
            gn = self.markov_operator(f_iter)
-           f_iter = f_iter - (stepsize/LA.norm(gn))* gn
+           f_last = f_iter
+           f_iter = f_iter - (0.84/LA.norm(gn)) * gn
+           f_iter[L] = f[L]
            t += 1
         return f_iter
 

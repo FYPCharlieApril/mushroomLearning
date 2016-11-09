@@ -34,6 +34,5 @@ ind_train, y_train = y_train[:, 0], y_train[:, 1]
 f = np.array([0] * df.shape[0])
 f[ind_train] = y_train
 st = subgradient_method(h)
-fn = st.markov_operator(f)
-
-#print (len(np.where(fn!=0)[0]))
+fn = st.sgm(f)
+print(fn)
