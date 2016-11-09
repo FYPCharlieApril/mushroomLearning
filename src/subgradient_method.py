@@ -6,10 +6,10 @@ class subgradient_method:
 
     def markov_operator(self,  f):
         # here we compute A and W
-        W, L = [], []
         v_size, e_size = self.hg.hMat.shape[0], self.hg.hMat.shape[1]
-        N = np.array(list(enumerate(f)))
-        N = np.where((N[:, 1] != 1) & (N[:, 1] != -1))[0]
+        f_index = np.array(list(enumerate(f)))
+        L = np.where((f_index[:, 1] == 1) | (f_index[:, 1] == -1))[0]
+        W = np.array([[0] * v_size] * v_size)
         head, tail = self.hg.head, self.hg.tail
         A = np.zeros((v_size, v_size))
         for e in range(e_size):
@@ -24,17 +24,14 @@ class subgradient_method:
                 A[u, v] = A[u, v] + self.hg.weight[e]
                 A[v, u] = A[u, v]
 
-        for i, u in enumerate(N):
-            W.append(A[u, :].sum())
+        for i, u in f_index:
+            W[i, i] = A[u, :].sum()
 
         # following are teh procedures of computing the Markov operator, here the projection matrix we use
         # are the one with all entries to be 1.
-        for i in range(N.shape[0]):
-            L.append([W[i]]*v_size)
-        L = np.matrix(L)
-        col_sum = np.array(np.sum(A, axis=0))
-        R = np.matrix([col_sum] * N.shape[0])
-        return (L-R).dot(f)
+        f_out = (W-A).dot(f)
+        f_out[L] = f[L]
+        return f_out
 
     def sgm(self):
         print("TO BE DONE")
