@@ -36,4 +36,4 @@ f[ind_train] = y_train
 st = subgradient_method(h)
 fn = st.markov_operator(f)
 
-#print (len(np.where((fn!=1)&(fn!=-1)&(fn!=0))[0]))
+print (len(np.where(fn!=0)[0]))
