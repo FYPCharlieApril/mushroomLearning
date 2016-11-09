@@ -1,4 +1,6 @@
 import numpy as np
+from numpy import linalg as LA
+import math
 
 class subgradient_method:
     def __init__(self, hg):
@@ -33,5 +35,33 @@ class subgradient_method:
         f_out[L] = f[L]
         return f_out
 
-    def sgm(self):
-        print("TO BE DONE")
+    def sgm(self,f):
+
+        t = 1
+        no_N = (f==0).sum()
+        stepsize = math.sqrt(no_N)/30
+        fn= f
+
+        fn = self.markov_operator(fn)
+        t += 1
+        print("fn_size:")
+        print(fn.size)
+        while(t < stepsize):
+           gn = self.markov_operator(fn)
+           print("gn_size:")
+           print(gn.size)
+           #fn = fn - (stepsize/LA.norm(gn))* gn
+           #t += 1
+        #return fn
+
+
+    def semisupervised(self,f):
+        no_N = (f==0).sum()
+        fn_p = np.zeros(no_N)+1
+        fn_n = np.zeros(no_N)-1
+        fn_p = self.sgm(fn_p)
+        fn_n = self.sgm(fn_n)
+        fn_avg = 1/2(fn_p + fn_n)
+        threshold = sum(fn_avg)/no_N
+
+        #for u in no_N:
