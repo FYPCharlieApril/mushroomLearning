@@ -50,15 +50,30 @@ class subgradient_method:
            t += 1
         return f_iter
 
-'''
-    def semisupervised(self,f):
-        no_N = (f==0).sum()
-        fn_p = np.zeros(no_N)+1
-        fn_n = np.zeros(no_N)-1
-        fn_p = self.sgm(fn_p)
-        fn_n = self.sgm(fn_n)
-        fn_avg = 1/2(fn_p + fn_n)
-        threshold = sum(fn_avg)/no_N
 
- #       for u in no_N:
-'''
+    def semisupervised(self,f):
+        f_index = np.array(list(enumerate(f)))
+        L = np.where((f_index[:, 1] == 1) | (f_index[:, 1] == -1))[0]
+
+        f_p = np.zeros(f.size)+1
+        f_p[L] = f[L]
+
+        f_n = np.zeros(f.size)-1
+        f_n[L] = f[L]
+
+        f_p = self.sgm(f_p)
+        f_n = self.sgm(f_n)
+
+
+        f_avg = 1/2(f_p + f_n)
+        U = np.where((f_index[:, 1] != 1) & (f_index[:, 1] != -1))[0]
+        threshold = sum(f_avg[U])/len(U)
+
+        for u in f_avg:
+            if(u>=threshold):
+                u = 1
+            else:
+                u = -1
+        f_avg[L] = f[L]
+        return f_avg
+
