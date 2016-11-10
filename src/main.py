@@ -30,8 +30,11 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=20)
 
 ind_test, y_test = y_test[:, 0], y_test[:, 1]
 ind_train, y_train = y_train[:, 0], y_train[:, 1]
-
+y = y[:, 1]
 f = np.array([0] * df.shape[0])
 f[ind_train] = y_train
 st = subgradient_method(h)
 fn = st.semisupervised(f)
+
+from sklearn.metrics import accuracy_score
+print('Accuracy: %.2f' % accuracy_score(y, fn))

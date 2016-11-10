@@ -44,7 +44,7 @@ class subgradient_method:
         while (t < 200):
            gn = self.markov_operator(f_iter)
            f_last = f_iter
-           f_iter = f_iter - (0.84/LA.norm(gn)) * gn
+           f_iter = f_iter - (0.824/LA.norm(gn)) * gn
            f_iter[self.L] = f[self.L]
            t += 1
         self.end_time = time.time()
