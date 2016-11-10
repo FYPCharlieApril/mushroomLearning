@@ -1,16 +1,17 @@
 import numpy as np
 from numpy import linalg as LA
-import math
+import time
 
 class subgradient_method:
     def __init__(self, hg):
         self.hg = hg
+        self.start_time = time.time()
+        self.end_time = self.start_time
 
     def markov_operator(self,  f):
         # here we compute A and W
         v_size, e_size = self.hg.hMat.shape[0], self.hg.hMat.shape[1]
-        f_index = np.array(list(enumerate(f)))
-        L = np.where((f_index[:, 1] == 1) | (f_index[:, 1] == -1))[0]
+        f_index = enumerate(f)
         W = np.zeros((v_size, v_size))
         A = np.zeros((v_size, v_size))
         head, tail = self.hg.head, self.hg.tail
@@ -31,49 +32,45 @@ class subgradient_method:
         # following are teh procedures of computing the Markov operator, here the projection matrix we use
         # are the one with all entries to be 1.
         f_out = (W-A).dot(f)
-        f_out[L] = f[L]
+        f_out[self.L] = f[self.L]
         return f_out
 
     def sgm(self,f):
-        f_index = np.array(list(enumerate(f)))
-        L = np.where((f_index[:, 1] == 1) | (f_index[:, 1] == -1))[0]
         t = 0
         f_iter, f_last = f, f
-        f_iter = self.markov_operator(f_iter)
+        #f_iter = self.markov_operator(f_iter)
 
         #while(abs(LA.norm(f_iter - f_last)) < 100):
         while (t < 200):
            gn = self.markov_operator(f_iter)
            f_last = f_iter
            f_iter = f_iter - (0.84/LA.norm(gn)) * gn
-           f_iter[L] = f[L]
+           f_iter[self.L] = f[self.L]
            t += 1
+        self.end_time = time.time()
         return f_iter
 
 
     def semisupervised(self,f):
         f_index = np.array(list(enumerate(f)))
-        L = np.where((f_index[:, 1] == 1) | (f_index[:, 1] == -1))[0]
+        self.L = np.where((f_index[:, 1] == 1) | (f_index[:, 1] == -1))[0]
+        self.f_star = f
 
         f_p = np.zeros(f.size)+1
-        f_p[L] = f[L]
-
+        f_p[self.L] = f[self.L]
         f_n = np.zeros(f.size)-1
-        f_n[L] = f[L]
+        f_n[self.L] = f[self.L]
 
         f_p = self.sgm(f_p)
         f_n = self.sgm(f_n)
 
-
-        f_avg = 1/2(f_p + f_n)
+        f_avg = 0.5 * (f_p + f_n)
         U = np.where((f_index[:, 1] != 1) & (f_index[:, 1] != -1))[0]
         threshold = sum(f_avg[U])/len(U)
-
-        for u in f_avg:
-            if(u>=threshold):
-                u = 1
-            else:
-                u = -1
-        f_avg[L] = f[L]
+        for i in range (len(f_avg)):
+            f_avg[i] = 1 if f_avg[i] > threshold else -1
+        f_avg[self.L] = f[self.L]
         return f_avg
+
+
 

@@ -35,4 +35,3 @@ f = np.array([0] * df.shape[0])
 f[ind_train] = y_train
 st = subgradient_method(h)
 fn = st.semisupervised(f)
-print(fn)
