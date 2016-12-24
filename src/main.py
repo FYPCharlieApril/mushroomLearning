@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from src.hyper_graph import hyper_graph
 from src.subgradient_method import subgradient_method
+from sklearn.model_selection import train_test_split
 
 np.set_printoptions(threshold=np.nan)
 
@@ -17,24 +17,14 @@ data_src = '../dataFile/agaricus-lepiota.data'
 df = pd.read_csv(data_src, header=None, na_values=['?'])
 df = df.dropna(axis=1)
 df.columns = Header
-h = hyper_graph(weight=np.array([1] * df.shape[0]), head=None, tail=None, df=df, \
-                   catFeaList=range(df.shape[1]-1), label_mapping={'e': 1, 'p': -1})
+df['label'] = df['label'].map({'e': 1, 'p': -1})
+X, y = df.values[:, 1:] , df.values[:, 0]
 
-from sklearn.model_selection import train_test_split
-
-result = []
-X,y = h.hMat, h.y
-y =np.matrix(list(enumerate(y)))
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=20)
-
+y_ind = np.matrix(list(enumerate(y)))
+X_train, X_test, y_train, y_test = train_test_split(X, y_ind, train_size=20)
 ind_test, y_test = y_test[:, 0], y_test[:, 1]
 ind_train, y_train = y_train[:, 0], y_train[:, 1]
-y = y[:, 1]
-f = np.array([0] * df.shape[0])
-f[ind_train] = y_train
-st = subgradient_method(h)
-fn = st.semisupervised(f)
 
-from sklearn.metrics import accuracy_score
-print('Accuracy: %.2f' % accuracy_score(y, fn))
+st = subgradient_method(X, y, ind_train)
+fn = st.fit_predict()
+print(1-np.array(np.where(fn != y)).shape[1]/y.shape[0])

@@ -1,12 +1,26 @@
 import numpy as np
 from numpy import linalg as LA
+from src.hyper_graph import hyper_graph
 import time
 
+
 class subgradient_method:
-    def __init__(self, hg):
-        self.hg = hg
+    def __init__(self, X, y, y_train_ind):
+        self.hg = self.construct_h_mat(X, y, y_train_ind)
         self.start_time = time.time()
         self.end_time = self.start_time
+
+    def construct_h_mat(self, X, y, y_train_ind):
+        hg = hyper_graph(weight=np.array([1] * X.shape[0]),
+                         head=None,
+                         tail=None,
+                         X=X,
+                         y=y,
+                         catFeaList=range(X.shape[1]))
+
+        self.f = np.array([0] * X.shape[0])
+        self.f[y_train_ind] = y[y_train_ind]
+        return hg
 
     def markov_operator(self,  f):
         # here we compute A and W
@@ -51,7 +65,8 @@ class subgradient_method:
         return f_iter
 
 
-    def semisupervised(self,f):
+    def fit_predict(self):
+        f = self.f
         f_index = np.array(list(enumerate(f)))
         self.L = np.where((f_index[:, 1] == 1) | (f_index[:, 1] == -1))[0]
         self.f_star = f
