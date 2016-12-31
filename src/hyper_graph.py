@@ -11,6 +11,9 @@ class hyper_graph:
             self.head = self.hMat
         if tail is not None:
             self.tail = tail
+        hMat = ohe.fit_transform(X).toarray()
+        return y, hMat
+
         else:
             self.tail = self.hMat
 
@@ -19,5 +22,3 @@ class hyper_graph:
         ohe = OneHotEncoder(categorical_features=catFeaList)
         for i in catFeaList:
             X[:, i] = le.fit_transform(X[:, i])
-        hMat = ohe.fit_transform(X).toarray()
-        return y, hMat
