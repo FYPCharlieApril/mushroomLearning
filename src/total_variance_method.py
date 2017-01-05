@@ -1,4 +1,6 @@
 import numpy as np
+from src import hyper_graph
+
 def __init__(self, sigma, seta, tau):
     self.seta = seta
     self.sigma = sigma
@@ -31,4 +33,7 @@ def ratio_dca(self):
 
 
 def pdhg(self):
+    pass
+
+def total_variation(self, h):
     pass
