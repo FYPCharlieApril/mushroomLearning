@@ -11,11 +11,10 @@ class hyper_graph:
             self.head = self.hMat
         if tail is not None:
             self.tail = tail
-        hMat = ohe.fit_transform(X).toarray()
-        return y, hMat
-
         else:
             self.tail = self.hMat
+        hMat = ohe.fit_transform(X).toarray()
+        return y, hMat
 
     def constructor(self, y, X, catFeaList):
         le = LabelEncoder()
