@@ -13,11 +13,11 @@ class hyper_graph:
             self.tail = tail
         else:
             self.tail = self.hMat
-        hMat = ohe.fit_transform(X).toarray()
-        return y, hMat
 
     def constructor(self, y, X, catFeaList):
         le = LabelEncoder()
         ohe = OneHotEncoder(categorical_features=catFeaList)
         for i in catFeaList:
             X[:, i] = le.fit_transform(X[:, i])
+        hMat = ohe.fit_transform(X).toarray()
+        return y, hMat

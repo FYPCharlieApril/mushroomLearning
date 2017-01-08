@@ -9,31 +9,19 @@ def __init__(self, sigma, seta, tau):
 def fit_predict(self, X, y):
     pass
 
+def pdhg_wh2(self, hMat, y):
+    f, f_ = 0, 0
+    dul_gap = 0
+    edge_num = hMat.shape[1]
+    for _ in range(100):
+        for i in range(edge_num):
+            # preparation
+            e = hMat[:][i]
 
-def proximal(self, x_, y, gf, s1=None):
-    if gf == "square_norm":
-        prox = 1/(1+self.tau) * (x_+self.tau * y)
-    if gf == "indicator":
-        if s1 is None:
-            print("Need to input s1 for this method")
-            return
-        else:
-            v = 1/(1+self.tau) * (x_+self.tau * y)
-            dino = np.norm(v)
-            dino = max([dino, 1])
-            prox = (x_ + self.tau * s1) / dino
-    return prox
+            # step 1
 
-def lovazs_extension(self, set_func):
-    pass
+            # step 2
+            # step 3
+            pass
 
 
-def ratio_dca(self):
-    pass
-
-
-def pdhg(self):
-    pass
-
-def total_variation(self, h):
-    pass
