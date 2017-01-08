@@ -9,6 +9,12 @@ class subgradient_method:
         self.hg = self.construct_h_mat(X, y, y_train_ind)
         self.start_time = time.time()
         self.end_time = self.start_time
+        self.y_train_ind = np.array(y_train_ind)
+        self.y_un_ind = []
+        for i in range(y.shape[0]):
+            if i not in y_train_ind:
+                self.y_un_ind.append(i)
+        self.y_un_ind = np.array(self.y_un_ind)
 
     def construct_h_mat(self, X, y, y_train_ind):
         hg = hyper_graph(weight=np.array([1] * X.shape[0]),
@@ -40,13 +46,14 @@ class subgradient_method:
                 v = v_can[0]
                 A[u, v] = A[u, v] + self.hg.weight[e]
                 A[v, u] = A[u, v]
+        for u in self.y_un_ind:
+            W[u, u] = sum(A[u, :])
+        print(W.sum)
 
-        for i, u in f_index:
-            W[i, i] = A[u, :].sum()
         # following are teh procedures of computing the Markov operator, here the projection matrix we use
         # are the one with all entries to be 1.
         f_out = (W-A).dot(f)
-        f_out[self.L] = f[self.L]
+        f_out[self.y_train_ind] = f[self.y_train_ind]
         return f_out
 
     def sgm(self,f):
@@ -55,11 +62,11 @@ class subgradient_method:
         #f_iter = self.markov_operator(f_iter)
 
         #while(abs(LA.norm(f_iter - f_last)) < 100):
-        while (t < 2000):
+        while (t < 400):
            gn = self.markov_operator(f_iter)
            f_last = f_iter
            f_iter = f_iter - (0.9/LA.norm(gn)) * gn
-           f_iter[self.L] = f[self.L]
+           f_iter[self.y_train_ind] = f[self.y_train_ind]
            t += 1
         self.end_time = time.time()
         return f_iter
@@ -68,13 +75,12 @@ class subgradient_method:
     def fit_predict(self):
         f = self.f
         f_index = np.array(list(enumerate(f)))
-        self.L = np.where((f_index[:, 1] == 1) | (f_index[:, 1] == -1))[0]
         self.f_star = f
 
         f_p = np.zeros(f.size)+1
-        f_p[self.L] = f[self.L]
+        f_p[self.y_train_ind] = f[self.y_train_ind]
         f_n = np.zeros(f.size)-1
-        f_n[self.L] = f[self.L]
+        f_n[self.y_train_ind] = f[self.y_train_ind]
 
         f_p = self.sgm(f_p)
         f_n = self.sgm(f_n)
@@ -84,7 +90,7 @@ class subgradient_method:
         threshold = sum(f_avg[U])/len(U)
         for i in range (len(f_avg)):
             f_avg[i] = 1 if f_avg[i] > threshold else -1
-        f_avg[self.L] = f[self.L]
+        f_avg[self.y_train_ind] = f[self.y_train_ind]
         return f_avg
 
 

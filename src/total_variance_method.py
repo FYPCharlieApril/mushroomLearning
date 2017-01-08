@@ -14,7 +14,6 @@ def fit_predict(self, X, y):
     pass
 
 def pdhg_wh2(self, hMat, y):
-    #dul_gap = 0
     m = hMat.shape[0]
     n = hMat.shape[1]
     f, f_ = [0] * m, [0] * m
@@ -35,7 +34,6 @@ def pdhg_wh2(self, hMat, y):
                 K_e_arr.append(K_e)
                 m_e_arr.append(m_e)
             else:
-
                 tmp = alpha_arr[i] + self.sigma * np.dat(K_e_arr[i], f_)
                 alpha_arr[i] = tmp - proximal(tmp, self.weight)
 
