@@ -61,14 +61,13 @@ class subgradient_method:
         #f_iter = self.markov_operator(f_iter)
 
         #while(abs(LA.norm(f_iter - f_last)) < 100):
-        while (t < 200):
-            print("Step:", t+1, "Current accuracy:", np.array(np.where(f_iter == self.y)).shape[1] / self.y.shape[0])
+        while (t < 500):
+            print("Current step:", t)
             gn = self.markov_operator(f_iter)
-            f_last = f_iter
             f_iter = f_iter - (0.9/LA.norm(gn)) * gn
             f_iter[self.y_train_ind] = self.y[self.y_train_ind]
             t += 1
-            self.end_time = time.time()
+        self.end_time = time.time()
         return f_iter
 
 
@@ -78,9 +77,9 @@ class subgradient_method:
         self.f_star = f
 
         f_p = np.zeros(f.size)+1
-        f_p[self.y_train_ind] = f[self.y_train_ind]
+        f_p[self.y_train_ind] = self.y[self.y_train_ind]
         f_n = np.zeros(f.size)-1
-        f_n[self.y_train_ind] = f[self.y_train_ind]
+        f_n[self.y_train_ind] = self.y[self.y_train_ind]
 
         f_p = self.sgm(f_p)
         f_n = self.sgm(f_n)
