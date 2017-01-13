@@ -35,6 +35,7 @@ class subgradient_method:
         W = np.zeros((v_size, v_size))
         A = np.zeros((v_size, v_size))
         head, tail = self.hg.head, self.hg.tail
+        f_out = np.array([0]*v_size)
         for e in range(e_size):
             e_tail = np.where(tail[:, e] == 1)[0]
             e_head = np.where(head[:, e] == 1)[0]
@@ -44,14 +45,15 @@ class subgradient_method:
             if u_can[1] - v_can[1] > 0:
                 u = u_can[0]
                 v = v_can[0]
-                A[u, v] = A[u, v] + self.hg.weight[e]
-                A[v, u] = A[u, v]
+                f_out[u] = f_out[u] + self.hg.weight[e] * (f[u] - f[v])
+#                A[u, v] = A[u, v] + self.hg.weight[e]
+#                A[v, u] = A[u, v]
 
-        for u in self.y_un_ind:
-            W[u, u] = sum(A[u, :])
+#        for u in self.y_un_ind:
+#            W[u, u] = sum(A[u, :])
         # following are teh procedures of computing the Markov operator, here the projection matrix we use
         # are the one with all entries to be 1.
-        f_out = (W-A).dot(f)
+#        f_out = (W-A).dot(f)
         f_out[self.y_train_ind] = self.y[self.y_train_ind]
         return f_out
 
@@ -62,7 +64,7 @@ class subgradient_method:
 
         #while(abs(LA.norm(f_iter - f_last)) < 100):
         while (t < 500):
-            print("Current step:", t)
+            print("Current step:", t+1)
             gn = self.markov_operator(f_iter)
             f_iter = f_iter - (0.9/LA.norm(gn)) * gn
             f_iter[self.y_train_ind] = self.y[self.y_train_ind]
