@@ -18,7 +18,7 @@ class subgradient_method:
         self.y = y
         self.parallel = parallel
         self.threads = []
-        print("The task is run in", self.parallel, "parallelly")
+        print("The task will run in", self.parallel, "threads parallelly")
 
     def construct_h_mat(self, X, y, y_train_ind):
         hg = hyper_graph(weight=np.array([1] * X.shape[0]),
@@ -58,7 +58,6 @@ class subgradient_method:
             task = np.where(total_task % self.parallel == i)[0]
             t = threading.Thread(target=self.compute_delta, args=(task, delta_list, f))
             threads.append(t)
-        for t in threads:
             t.start()
             #self.computer_per_edge(e, delta_list, f)
 
