@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-#import subgradient_method
 from src.subgradient_method import subgradient_method
 from sklearn.model_selection import train_test_split
 
@@ -22,7 +21,7 @@ df['label'] = df['label'].map({'e': 1, 'p': -1})
 X, y = df.values[:, 1:] , df.values[:, 0]
 
 y_ind = np.matrix(list(enumerate(y)))
-X_train, X_test, y_train, y_test = train_test_split(X, y_ind, train_size=60)
+X_train, X_test, y_train, y_test = train_test_split(X, y_ind, train_size=200)
 ind_test, y_test = y_test[:, 0], y_test[:, 1]
 ind_train, y_train = y_train[:, 0], y_train[:, 1]
 

@@ -18,6 +18,7 @@ class subgradient_method:
         self.y = y
         self.parallel = parallel
         self.threads = []
+        self.task_list = []
         print("The task will run in", self.parallel, "threads parallelly")
 
     def construct_h_mat(self, X, y, y_train_ind):
@@ -53,24 +54,17 @@ class subgradient_method:
         f_out = np.array([0]*v_size)
         delta_list = []
         threads = []
-        total_task = np.array(range(e_size))
-        for i in range(self.parallel):
-            task = np.where(total_task % self.parallel == i)[0]
+        for task in self.task_list:
             t = threading.Thread(target=self.compute_delta, args=(task, delta_list, f))
             threads.append(t)
             t.start()
-            #self.computer_per_edge(e, delta_list, f)
 
-#                A[u, v] = A[u, v] + self.hg.weight[e]
-#                A[v, u] = A[u, v]
+        for t in threads:
+            t.join()
+
         for u, d in delta_list:
             f_out[u] = f_out[u] + d
 
-#         for u in self.y_un_ind:
-#            W[u, u] = sum(A[u, :])
-        # following are teh procedures of computing the Markov operator, here the projection matrix we use
-        # are the one with all entries to be 1.
-#        f_out = (W-A).dot(f)
         f_out[self.y_train_ind] = self.y[self.y_train_ind]
         return f_out
 
@@ -78,8 +72,10 @@ class subgradient_method:
         t = 0
         f_iter, f_last = f, f
         #f_iter = self.markov_operator(f_iter)
-
-        #while(abs(LA.norm(f_iter - f_last)) < 100):
+        e_size = self.hg.hMat.shape[1]
+        total_task = np.array(range(e_size))
+        for i in range(self.parallel):
+            self.task_list.append(np.where(total_task % self.parallel == i)[0])
         while (t < 2000):
             print("Current step:", t+1)
             gn = self.markov_operator(f_iter)
@@ -93,7 +89,6 @@ class subgradient_method:
 
     def fit_predict(self):
         f = self.f
-        f_index = np.array(list(enumerate(f)))
         self.f_star = f
 
         f_p = np.zeros(f.size)+1
