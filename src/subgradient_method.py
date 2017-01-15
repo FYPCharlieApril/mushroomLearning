@@ -33,7 +33,7 @@ class subgradient_method:
         self.f[y_train_ind] = y[y_train_ind]
         return hg
 
-    def compute_delta(self, e_list, delta_list, f):
+    def compute_delta(self, e_list, f, f_out, threadLock):
         # this function is used for parallel computing
         # here e is the index of this edge
         for e in e_list:
@@ -46,24 +46,29 @@ class subgradient_method:
             if u_can[1] - v_can[1] > 0:
                 u = u_can[0]
                 v = v_can[0]
-                delta_list.append([u, self.hg.weight[e] * (f[u] - f[v])])
+                d = self.hg.weight[e] * (f[u] - f[v])
+                threadLock.acquire()
+                f_out[u] = f_out[u] + d
+                threadLock.release()
 
     def markov_operator(self,  f):
         # here we compute A and W
         v_size, e_size = self.hg.hMat.shape[0], self.hg.hMat.shape[1]
         f_out = np.array([0]*v_size)
-        delta_list = []
         threads = []
+        total_task = range(e_size)
+        # parallel task dealing
+        threadLock = threading.Lock()
         for task in self.task_list:
-            t = threading.Thread(target=self.compute_delta, args=(task, delta_list, f))
+            t = threading.Thread(target=self.compute_delta, args=(task, f, f_out, threadLock))
             threads.append(t)
             t.start()
 
         for t in threads:
             t.join()
 
-        for u, d in delta_list:
-            f_out[u] = f_out[u] + d
+        # un-parallel version
+        #_ = self.compute_delta(total_task, f, f_out, threadLock)
 
         f_out[self.y_train_ind] = self.y[self.y_train_ind]
         return f_out
@@ -76,16 +81,18 @@ class subgradient_method:
         total_task = np.array(range(e_size))
         for i in range(self.parallel):
             self.task_list.append(np.where(total_task % self.parallel == i)[0])
-        while (t < 200):
+        f_iter_list = []
+        while (t < 2000):
             print("Current step:", t+1)
             gn = self.markov_operator(f_iter)
             f_iter = f_iter - (0.9/LA.norm(gn)) * gn
             f_iter[self.y_train_ind] = self.y[self.y_train_ind]
             t += 1
+
         self.end_time = time.time()
         print("Time used to run:", self.end_time-self.start_time)
         return f_iter
-
+        #return np.mean(f_iter_list, axis=0)
 
     def fit_predict(self):
         f = self.f
