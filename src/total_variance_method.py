@@ -10,8 +10,13 @@ def __init__(self, sigma, seta, tau, lamda, weight):
     self.lamda = lamda
     self.weight = weight
 
-def fit_predict(self, X, y):
-    pass
+def fit_predict(self, X, f):
+    hg = hyper_graph(weight=np.array([1] * X.shape[0]),
+                     head=None,
+                     tail=None,
+                     X=X,
+                     catFeaList=range(X.shape[1]))
+
 
 def pdhg_wh2(self, hMat, y):
     m = hMat.shape[0]
@@ -35,7 +40,7 @@ def pdhg_wh2(self, hMat, y):
                 m_e_arr.append(m_e)
             else:
                 tmp = alpha_arr[i] + self.sigma * np.dat(K_e_arr[i], f_)
-                alpha_arr[i] = tmp - proximal(tmp, self.weight)
+                alpha_arr[i] = tmp - proximal(tmp, self.weight[i])
 
         # step 2
         delta = np.array([0]*m)
@@ -47,7 +52,7 @@ def pdhg_wh2(self, hMat, y):
 
         # step 3
         f_ = f + self.seta * (f - old_f)
-
+    return f
 
 def proximal(self, alpha, we):
     #step 1:
@@ -72,9 +77,9 @@ def proximal(self, alpha, we):
         #step 4:
         r_old = r
         r = sorted_alpha[m-p][1]
-        s = s + p/q * (r_old-r)
+        s = s + p / q * (r_old-r)
         p = findp(sorted_alpha, m, r)
-        q = findq(sorted_alpha, m, s)
+        q = findq(sorted_alpha, s)
 
     #step 6:
     tmp1 = 0
@@ -94,13 +99,13 @@ def proximal(self, alpha, we):
             alpha[i] = s
     return alpha
 
-def findp(self, sorted_alpha, m, r):
+def findp(sorted_alpha, m, r):
     alpha = zip(*sorted_alpha)[1]
-    n = bisect.bisect_left(sorted_alpha, r)
+    n = bisect.bisect_left(alpha, r)
     p = m-n+1
     return p
 
-def findq(self, sorted_alpha, m, s):
+def findq(sorted_alpha, s):
     alpha = zip(*sorted_alpha)[1]
-    q = bisect.bisect_left(sorted_alpha, s)
+    q = bisect.bisect_left(alpha, s)
     return q

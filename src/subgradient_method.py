@@ -5,32 +5,29 @@ import time
 import threading
 
 class subgradient_method:
-    def __init__(self, X, y, y_train_ind, parallel=1):
-        self.hg = self.construct_h_mat(X, y, y_train_ind)
+    def __init__(self, X, f, y_train_ind, parallel=1):
+        self.hg = self.construct_h_mat(X)
         self.start_time = time.time()
         self.end_time = self.start_time
         self.y_train_ind = np.array(y_train_ind)
         self.y_un_ind = []
-        for i in range(y.shape[0]):
+        for i in range(f.shape[0]):
             if i not in y_train_ind:
                 self.y_un_ind.append(i)
         self.y_un_ind = np.array(self.y_un_ind)
-        self.y = y
+        self.f = f
+        self.f_star = f
         self.parallel = parallel
         self.threads = []
         self.task_list = []
         print("The task will run in", self.parallel, "threads parallelly")
 
-    def construct_h_mat(self, X, y, y_train_ind):
+    def construct_h_mat(self, X):
         hg = hyper_graph(weight=np.array([1] * X.shape[0]),
                          head=None,
                          tail=None,
                          X=X,
-                         y=y,
                          catFeaList=range(X.shape[1]))
-
-        self.f = np.array([0] * X.shape[0])
-        self.f[y_train_ind] = y[y_train_ind]
         return hg
 
     def compute_delta(self, e_list, f, f_out, threadLock):
@@ -56,7 +53,7 @@ class subgradient_method:
         v_size, e_size = self.hg.hMat.shape[0], self.hg.hMat.shape[1]
         f_out = np.array([0]*v_size)
         threads = []
-        total_task = range(e_size)
+        #total_task = range(e_size)
         # parallel task dealing
         threadLock = threading.Lock()
         for task in self.task_list:
@@ -70,38 +67,34 @@ class subgradient_method:
         # un-parallel version
         #_ = self.compute_delta(total_task, f, f_out, threadLock)
 
-        f_out[self.y_train_ind] = self.y[self.y_train_ind]
+        f_out[self.y_train_ind] = self.f_star[self.y_train_ind]
         return f_out
 
     def sgm(self,f):
         t = 0
         f_iter, f_last = f, f
-        #f_iter = self.markov_operator(f_iter)
         e_size = self.hg.hMat.shape[1]
         total_task = np.array(range(e_size))
         for i in range(self.parallel):
             self.task_list.append(np.where(total_task % self.parallel == i)[0])
-        f_iter_list = []
-        while (t < 2000):
+        while (t < 500):
             print("Current step:", t+1)
             gn = self.markov_operator(f_iter)
             f_iter = f_iter - (0.9/LA.norm(gn)) * gn
-            f_iter[self.y_train_ind] = self.y[self.y_train_ind]
+            f_iter[self.y_train_ind] = self.f_star[self.y_train_ind]
             t += 1
 
         self.end_time = time.time()
         print("Time used to run:", self.end_time-self.start_time)
         return f_iter
-        #return np.mean(f_iter_list, axis=0)
 
     def fit_predict(self):
         f = self.f
-        self.f_star = f
 
         f_p = np.zeros(f.size)+1
-        f_p[self.y_train_ind] = self.y[self.y_train_ind]
+        f_p[self.y_train_ind] = self.f_star[self.y_train_ind]
         f_n = np.zeros(f.size)-1
-        f_n[self.y_train_ind] = self.y[self.y_train_ind]
+        f_n[self.y_train_ind] = self.f_star[self.y_train_ind]
 
         f_p = self.sgm(f_p)
         f_n = self.sgm(f_n)

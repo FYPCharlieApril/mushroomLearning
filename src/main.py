@@ -21,13 +21,16 @@ df['label'] = df['label'].map({'e': 1, 'p': -1})
 X, y = df.values[:, 1:] , df.values[:, 0]
 
 y_ind = np.matrix(list(enumerate(y)))
-X_train, X_test, y_train, y_test = train_test_split(X, y_ind, train_size=40)
+X_train, X_test, y_train, y_test = train_test_split(X, y_ind, train_size=400)
 ind_test, y_test = y_test[:, 0], y_test[:, 1]
 ind_train, y_train = y_train[:, 0], y_train[:, 1]
 
+f = np.array([0] * X.shape[0])
+f[ind_train] = y[ind_train]
+
 acc_list = []
-for _ in range(5):
-    st = subgradient_method(X, y, ind_train, parallel=4)
+for _ in range(1):
+    st = subgradient_method(X, f, ind_train, parallel=4)
     acc_list = []
     fn = st.fit_predict()
     acc_list.append(np.array(np.where(fn == y)).shape[1]/y.shape[0])
