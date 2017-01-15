@@ -25,10 +25,12 @@ X_train, X_test, y_train, y_test = train_test_split(X, y_ind, train_size=40)
 ind_test, y_test = y_test[:, 0], y_test[:, 1]
 ind_train, y_train = y_train[:, 0], y_train[:, 1]
 
-fn_list = []
+acc_list = []
 for _ in range(5):
     st = subgradient_method(X, y, ind_train, parallel=4)
-    fn_list.append(st.fit_predict())
-fn = np.mean(fn_list, axis = 0)
-print("True prediction rate:", np.array(np.where(fn == y)).shape[1]/y.shape[0])
+    acc_list = []
+    fn = st.fit_predict()
+    acc_list.append(np.array(np.where(fn == y)).shape[1]/y.shape[0])
+acc = np.mean(acc_list, axis = 0)
+print("True prediction rate:", acc)
 
