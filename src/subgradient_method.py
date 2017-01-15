@@ -77,7 +77,7 @@ class subgradient_method:
         total_task = np.array(range(e_size))
         for i in range(self.parallel):
             self.task_list.append(np.where(total_task % self.parallel == i)[0])
-        while (t < 500):
+        while (t < 2000):
             print("Current step:", t+1)
             gn = self.markov_operator(f_iter)
             f_iter = f_iter - (0.9/LA.norm(gn)) * gn
