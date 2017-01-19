@@ -38,7 +38,7 @@ class total_variance_method:
         alpha_arr = []
         K_e_arr = []
         for k in range(10000):
-            print("Current Step:", k+1)
+            #print("Current Step:", k+1)
             # step 1
             for i in range(n):
                 if k == 0:
@@ -126,10 +126,10 @@ class total_variance_method:
 
     def find_p(self, sorted_alpha, r):
         alpha = list(zip(*sorted_alpha))[1]
-        n = bisect.bisect_right(alpha, r)
-        return n-1
+        n = bisect.bisect_left(alpha, r)
+        return n
 
     def find_q(self, sorted_alpha, s):
         alpha = list(zip(*sorted_alpha))[1]
-        n = bisect.bisect_left(alpha, s)
-        return n
+        n = bisect.bisect_right(alpha, s)
+        return n-1

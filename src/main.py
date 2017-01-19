@@ -43,9 +43,9 @@ acc /= 5
 print("True prediction rate:", acc)
 result.append(acc)
 '''
-st = total_variance_method(sigma=0.09,
+st = total_variance_method(sigma=0.07,
                            seta=1,
-                           tau=0.09,
+                           tau=0.07,
                            lamda=0.00001,
                            weight=[1]*f.shape[0],
                            X=X,
