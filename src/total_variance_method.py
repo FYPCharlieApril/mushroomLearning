@@ -13,6 +13,11 @@ class total_variance_method:
         self.weight = weight
         self.f_star = f
         self.y_train_ind = y_train_ind
+        self.y_un_ind = []
+        for i in range(f.shape[0]):
+            if i not in y_train_ind:
+                self.y_un_ind.append(i)
+        self.y_un_ind = np.array(self.y_un_ind)
 
     def construct_h_mat(self, X):
         hg = hyper_graph(weight=np.array([1] * X.shape[0]),
@@ -25,40 +30,50 @@ class total_variance_method:
     def fit_predict(self):
         return self.pdhg_wh2(self.hg)
 
-    def pdhg_wh2(self, hMat):
+    def pdhg_wh2(self, hg):
+        hMat = hg.hMat
         m = hMat.shape[0]
         n = hMat.shape[1]
-        f, f_ = [0] * m, [0] * m
+        f, f_ = np.array([0] * m), np.array([0] * m)
         alpha_arr = []
-        for k in range(100):
-            K_e_arr = []
+        K_e_arr = []
+        for k in range(10000):
+            print("Current Step:", k+1)
             # step 1
             for i in range(n):
                 if k == 0:
                     # when k = 0, it is the step for initialization for K_e
                     e = hMat[:][i]
                     one_indeces = np.where(e == 1)[0]
-                    m_e = one_indeces.shape[0]               # this is the number of vertices for edge e
-                    K_e = np.matrix([[0] * m_e] * m)        # K matrix for the particular edge e
-                    for i, one_index in enumerate(one_indeces):
-                        K_e[i][one_index] = 1
-                    alpha_arr = self.f_star[one_indeces]
-                    #alpha_arr.append(np.array([0]*m_e))
-                    K_e_arr.append(K_e)
+                    #m_e = one_indeces.shape[0]               # this is the number of vertices for edge e
+                    #K_e = np.matrix([[0] * m] * m_e)        # K matrix for the particular edge e
+                    #for i, one_index in enumerate(one_indeces):
+                        #print(i, one_index, K_e.shape)
+                        #K_e[i, one_index] = 1
+                    #print(self.f_star[one_indeces])
+                    alpha_arr.append(self.f_star[one_indeces])
+                    K_e_arr.append(one_indeces)
                 else:
-                    tmp = alpha_arr[i] + self.sigma * np.dot(K_e_arr[i], f_)
+                    # dot product to be optimized
+                    tmp = alpha_arr[i] + self.sigma * f_[one_indeces]
                     alpha_arr[i] = tmp - self.proximal(tmp, self.weight[i])
 
             # step 2
             delta = np.array([0]*m)
             for i in range(n):
-                delta = delta + np.dot(K_e_arr[i].T, alpha_arr[i])
+                for ind, k in enumerate(K_e_arr[i]):
+                    delta[k] += alpha_arr[i][ind]
+
             old_f = f
             x_ = f - self.tau * delta
             f = 1 / (1 + self.tau) * (x_ + self.tau * self.f_star)
-
+            f[self.y_train_ind] = self.f_star[self.y_train_ind]
             # step 3
             f_ = f + self.seta * (f - old_f)
+
+        threshold = sum(f[self.y_un_ind]) / len(self.y_un_ind)
+        for i in self.y_un_ind:
+            f[i] = 1 if f[i] > threshold else -1
         return f
 
 
@@ -74,26 +89,29 @@ class total_variance_method:
         s = min(sorted_alpha, key=itemgetter(1))[1]
 
         #step 3:
-        p = m-self.find_pos(sorted_alpha, r)+1
-        q = self.find_pos(sorted_alpha, s)
+        p = m - self.find_p(sorted_alpha, r)
+        q = self.find_q(sorted_alpha, s) + 1
         murs = 2 * mu * (r - s)
-        deltaE1r = sum(np.array(sorted_alpha[m - p:p][1]) - r)
-        while deltaE1r < murs and q+1 <= m-p:
-
+        tar = np.array(list(zip(*sorted_alpha[m - p:m]))[1])
+        deltaE1r = sum(tar - r)
+        while deltaE1r < murs and q <= m-p-1:
             #step 4:
             r_old = r
-            r = sorted_alpha[m-p][1]
+            r = sorted_alpha[m-p-1][1]
             s = s + p / q * (r_old-r)
-            p = m-self.find_pos(sorted_alpha, r)+1
-            q = self.find_pos(sorted_alpha, s)
+            p = m - self.find_p(sorted_alpha, r)
+            q = self.find_q(sorted_alpha, s) + 1
 
             # loop condition computation
             murs = 2 * mu * (r - s)
-            deltaE1r = sum(np.array(sorted_alpha[m-p:p][1]) - r)
+            tar = np.array(list(zip(*sorted_alpha[m - p:m]))[1])
+            deltaE1r = sum(tar - r)
 
         #step 6:
-        tmp1 = sum(sorted_alpha[m-p:m][1])
-        tmp2 = sum(sorted_alpha[0:q][1])
+        tar = np.array(list(zip(*sorted_alpha[m - p:m]))[1])
+        tmp1 = sum(tar)
+        tar = np.array(list(zip(*sorted_alpha[0 : q]))[1])
+        tmp2 = sum(tar)
         s = (2*mu*tmp1/(p+2*mu) + tmp2) / (q + 2*mu - 4*mu*mu/(tmp1+2*mu))
         r = ((q+2*mu)*s-tmp2) / (2*mu)
 
@@ -106,7 +124,12 @@ class total_variance_method:
         return alpha
 
 
-    def find_pos(sorted_alpha, r):
-        alpha = zip(*sorted_alpha)[1]
-        n = bisect.bisect_left(alpha, r)
+    def find_p(self, sorted_alpha, r):
+        alpha = list(zip(*sorted_alpha))[1]
+        n = bisect.bisect_right(alpha, r)
+        return n-1
+
+    def find_q(self, sorted_alpha, s):
+        alpha = list(zip(*sorted_alpha))[1]
+        n = bisect.bisect_left(alpha, s)
         return n
