@@ -37,32 +37,29 @@ class total_variance_method:
         f, f_ = np.array([0] * m), np.array([0] * m)
         alpha_arr = []
         K_e_arr = []
-        for k in range(10000):
-            #print("Current Step:", k+1)
+        for k in range(200):
+            print("Current Step:", k+1)
             # step 1
             for i in range(n):
                 if k == 0:
                     # when k = 0, it is the step for initialization for K_e
-                    e = hMat[:][i]
+                    e = hMat[:, i]
                     one_indeces = np.where(e == 1)[0]
-                    #m_e = one_indeces.shape[0]               # this is the number of vertices for edge e
-                    #K_e = np.matrix([[0] * m] * m_e)        # K matrix for the particular edge e
-                    #for i, one_index in enumerate(one_indeces):
-                        #print(i, one_index, K_e.shape)
-                        #K_e[i, one_index] = 1
-                    #print(self.f_star[one_indeces])
-                    alpha_arr.append(self.f_star[one_indeces])
+                    this_alpha = self.f_star[one_indeces]
+                    alpha_arr.append(this_alpha)
                     K_e_arr.append(one_indeces)
                 else:
                     # dot product to be optimized
-                    tmp = alpha_arr[i] + self.sigma * f_[one_indeces]
+                    #print(f_[K_e_arr[i]])
+                    #print(alpha_arr[i])
+                    tmp = alpha_arr[i] + self.sigma * f_[K_e_arr[i]]
                     alpha_arr[i] = tmp - self.proximal(tmp, self.weight[i])
 
             # step 2
             delta = np.array([0]*m)
             for i in range(n):
-                for ind, k in enumerate(K_e_arr[i]):
-                    delta[k] += alpha_arr[i][ind]
+                for ind, k_e in enumerate(K_e_arr[i]):
+                    delta[k_e] += alpha_arr[i][ind]
 
             old_f = f
             x_ = f - self.tau * delta
@@ -83,7 +80,7 @@ class total_variance_method:
         mu = self.lamda * we / self.sigma
         index_alpha = list(enumerate(alpha))
         sorted_alpha = sorted(index_alpha, key=itemgetter(1))
-
+        #print(sorted_alpha)
         #step 2:
         r = max(sorted_alpha, key=itemgetter(1))[1]
         s = min(sorted_alpha, key=itemgetter(1))[1]
